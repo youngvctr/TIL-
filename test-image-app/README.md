@@ -44,3 +44,8 @@
   - node-fetch 패키지를 불러올 때 C:/Users/JH/Desktop/workspaces/test-app/node_modules/node-fetch/@types/index
   - node-fetch@2는 "C:/Users/JH/AppData/Local/Microsoft/TypeScript/4.7/node_modules/@types/node-fetch/index"
     이므로 경로가 다르게 설정되어 있음을 알 수 있다.
+
+  - +[babel-core](https://www.npmjs.com/package/@babel/core) ; 작성한 코드의 '최신'형식을 commonJS 형태로 자동으로 변환
+  - +[babel-node](https://www.npmjs.com/package/@babel/node) 
+  - +[babel-cli](https://www.npmjs.com/package/@babel/cli)   
+  - +[babel-preset-env](https://www.npmjs.com/package/@babel/preset-env)
