@@ -1,17 +1,17 @@
 // @ts-check
 require('dotenv').config()
 
-const{GITHUB_ACCESS_TOKEN} = process.env
+const { GITHUB_ACCESS_TOKEN } = process.env
 
-const {program} = require('commander')
-const {Octokit} = require('octokit')
+const { program } = require('commander')
+const { Octokit } = require('octokit')
 const prompts = require('prompts')
 const chalk = require('chalk')
 const marked = require('marked')
 
 program.version('0.0.1')
 
-const octokit = new Octokit({auth: GITHUB_ACCESS_TOKEN})
+const octokit = new Octokit({ auth: GITHUB_ACCESS_TOKEN })
 
 const OWNER = process.env.GITHUB_OWNER || ''
 const REPO = process.env.GITHUB_REPO || ''
@@ -21,196 +21,196 @@ const LABEL_BUG = 'bug'
 const LABEL_NEEDS_SCREENSHOT = 'needs-screenshot'
 
 program
-    .command('me')
-    .description('Check my profile')
-    .action(async () => {
-        const {
-            data:{login}, 
-        } = await octokit.rest.users.getAuthenticated()
-        console.log(`Hello, ${login}`)
-    })
+  .command('me')
+  .description('Check my profile')
+  .action(async () => {
+    const {
+      data: { login },
+    } = await octokit.rest.users.getAuthenticated()
+    console.log(`Hello, ${login}`)
+  })
 
 /**
- * 
- * @param {Array<*>} labels 
- * @param {string} labelName 
+ *
+ * @param {Array<*>} labels
+ * @param {string} labelName
  * @returns {boolean}
  */
 function hasLabel(labels, labelName) {
-    return labels.find((label) => label.name === labelName) !== undefined
+  return labels.find((label) => label.name === labelName) !== undefined
 }
 
 program
-    .command('lists-bugs')
-    .description('List issues with bug label')
-    .action(async () => {
-        const result = await octokit.rest.issues.listForRepo({
-            owner: OWNER,
-            repo: REPO,
-            labels: 'bug',
-        })
-
-        const issuesWithBugLabel = result.data.filter((issue) =>
-            hasLabel(issue.labels, LABEL_BUG)
-        )
-
-        const output = issuesWithBugLabel.map((issue) => ({
-            title: issue.title,
-            number: issue.number,
-        }))
-
-        console.log(output)
+  .command('lists-bugs')
+  .description('List issues with bug label')
+  .action(async () => {
+    const result = await octokit.rest.issues.listForRepo({
+      owner: OWNER,
+      repo: REPO,
+      labels: 'bug',
     })
+
+    const issuesWithBugLabel = result.data.filter((issue) =>
+      hasLabel(issue.labels, LABEL_BUG)
+    )
+
+    const output = issuesWithBugLabel.map((issue) => ({
+      title: issue.title,
+      number: issue.number,
+    }))
+
+    console.log(output)
+  })
 
 program
-    .command('check-prs')
-    .description('Check pull request status')
-    .action(async () => {
-        const result = await octokit.rest.pulls.list({
-            owner: OWNER,
-            repo: REPO,
-        })
-    
-        const prsWithDiff = await Promise.all(
-            result.data.map(async (pr) => ({
-                labels: pr.labels,
-                number: pr.number,
-                compare: await octokit.rest.repos.compareCommits({
-                    owner: OWNER,
-                    repo: REPO,
-                    base: pr.base.ref,
-                    head: pr.head.ref,
-                })
-            }))
-        )
-
-        await Promise.all(
-            prsWithDiff
-                .map(({compare, ...rest}) => {
-                    const totalChanges = compare.data.files?.reduce(
-                        (sum, file) => sum + file.changes,
-                        0
-                    )
-                    return {
-                        compare,
-                        totalChanges,
-                        ...rest,
-                    }
-                })
-                .filter(
-                    (pr) =>
-                        pr && typeof pr.totalChanges === 'number' && pr.totalChanges > 100
-                )
-                .map(async ({ labels, number }) => {
-                    if (!hasLabel(labels, LABEL_TOO_BIG)) {
-                        console.log(
-                            chalk.greenBright(
-                                `Adding ${LABEL_TOO_BIG} label to PR ${number}...`
-                            )
-                        )
-                    
-                    const response = await prompts({
-                        type: 'confirm',
-                        name: 'shouldContinue',
-                        message: `Do you really want to add label ${LABEL_TOO_BIG} to PR #${number}`
-                    })
-
-                    if(response.shouldContinue) {
-                        return octokit.rest.issues.addLabels({
-                            owner: OWNER,
-                            repo: REPO,
-                            issue_number: number,
-                            labels: [LABEL_TOO_BIG],
-                        })
-                    }
-                    console.log('Cancelled!')
-                }
-                return undefined
-            })
-        )
+  .command('check-prs')
+  .description('Check pull request status')
+  .action(async () => {
+    const result = await octokit.rest.pulls.list({
+      owner: OWNER,
+      repo: REPO,
     })
 
-    /**
-     * 
-     * @param {string} md 
-     * @returns {boolean}
-     */
-    function isAnyScreenshotInMarkdownDocument(md) {
-        const tokens = marked.lexer(md)
+    const prsWithDiff = await Promise.all(
+      result.data.map(async (pr) => ({
+        labels: pr.labels,
+        number: pr.number,
+        compare: await octokit.rest.repos.compareCommits({
+          owner: OWNER,
+          repo: REPO,
+          base: pr.base.ref,
+          head: pr.head.ref,
+        }),
+      }))
+    )
 
-        let didFind = false
-        marked.walkTokens(tokens, (token) => {
-            if (token.type === 'image') {
-                didFind = true
-            }
+    await Promise.all(
+      prsWithDiff
+        .map(({ compare, ...rest }) => {
+          const totalChanges = compare.data.files?.reduce(
+            (sum, file) => sum + file.changes,
+            0
+          )
+          return {
+            compare,
+            totalChanges,
+            ...rest,
+          }
         })
-        
-        return didFind
-    }
-
-    program
-        .command('check-screenshots')
-        .description(
-            'Check if any issue is missing screenshot even if it has bug label on it0'
+        .filter(
+          (pr) =>
+            pr && typeof pr.totalChanges === 'number' && pr.totalChanges > 100
         )
-        .action(async ()=> {
-            const result = await octokit.rest.issues.listForRepo({
-                owner: OWNER,
-                repo: REPO,
-                labelss: 'bug',
+        .map(async ({ labels, number }) => {
+          if (!hasLabel(labels, LABEL_TOO_BIG)) {
+            console.log(
+              chalk.greenBright(
+                `Adding ${LABEL_TOO_BIG} label to PR ${number}...`
+              )
+            )
+
+            const response = await prompts({
+              type: 'confirm',
+              name: 'shouldContinue',
+              message: `Do you really want to add label ${LABEL_TOO_BIG} to PR #${number}`,
             })
 
-            const issuesWithBugLabel = result.data
-            const issuesWithoutScreenshot = issuesWithBugLabel.filter(
-                (issue) =>
-                    (!issue.body || !isAnyScreenshotInMarkdownDocument(issue.body)) &&
-                    !hasLabel(issue.labels, LABEL_NEEDS_SCREENSHOT)
-            )
+            if (response.shouldContinue) {
+              return octokit.rest.issues.addLabels({
+                owner: OWNER,
+                repo: REPO,
+                issue_number: number,
+                labels: [LABEL_TOO_BIG],
+              })
+            }
+            console.log('Cancelled!')
+          }
+          return undefined
+        })
+    )
+  })
 
-            await Promise.all(
-                issuesWithoutScreenshot.map(async (issue) => {
-                    const shouldContinue = await prompts({
-                        type: 'confirm',
-                        name: 'shoouldContinue',
-                        message: `Add ${LABEL_NEEDS_SCREENSHOT} to issue #${issue.number}?`,
-                    })
+/**
+ *
+ * @param {string} md
+ * @returns {boolean}
+ */
+function isAnyScreenshotInMarkdownDocument(md) {
+  const tokens = marked.lexer(md)
 
-                    if(shouldContinue) {
-                        await octokit.rest.issues.addLabels({
-                            owner: OWNER,
-                            repo: REPO,
-                            issue_number: issue.number,
-                            labels: [LABEL_NEEDS_SCREENSHOT],
-                        })
-                    }
-                })
-            )
+  let didFind = false
+  marked.walkTokens(tokens, (token) => {
+    if (token.type === 'image') {
+      didFind = true
+    }
+  })
 
-            const issuesResolved = issuesWithBugLabel.filter(
-                (issue) =>
-                    issue.body &&
-                    isAnyScreenshotInMarkdownDocument(issue.body) &&
-                    hasLabel(issue.labels, LABEL_NEEDS_SCREENSHOT)
-            )
+  return didFind
+}
 
-            await Promise.all(
-                issuesResolved.map(async (issue) => {
-                    const shouldConfirm = await prompts({
-                        type: 'confirm',
-                        name: 'chouldConfirm',
-                        message: `Remove ${LABEL_NEEDS_SCREENSHOT} from issue #${issue.number}?`,
-                    })
+program
+  .command('check-screenshots')
+  .description(
+    'Check if any issue is missing screenshot even if it has bug label on it0'
+  )
+  .action(async () => {
+    const result = await octokit.rest.issues.listForRepo({
+      owner: OWNER,
+      repo: REPO,
+      labelss: 'bug',
+    })
 
-                    if(shouldConfirm) {
-                        await octokit.rest.issues.removeLabel({
-                            owner: OWNER,
-                            repo: REPO,
-                             issue_number: issue.number,
-                             name: LABEL_NEEDS_SCREENSHOT,
-                        })
-                    }
-                })
-            )
+    const issuesWithBugLabel = result.data
+    const issuesWithoutScreenshot = issuesWithBugLabel.filter(
+      (issue) =>
+        (!issue.body || !isAnyScreenshotInMarkdownDocument(issue.body)) &&
+        !hasLabel(issue.labels, LABEL_NEEDS_SCREENSHOT)
+    )
+
+    await Promise.all(
+      issuesWithoutScreenshot.map(async (issue) => {
+        const shouldContinue = await prompts({
+          type: 'confirm',
+          name: 'shoouldContinue',
+          message: `Add ${LABEL_NEEDS_SCREENSHOT} to issue #${issue.number}?`,
         })
 
-    program.parseAsync()
+        if (shouldContinue) {
+          await octokit.rest.issues.addLabels({
+            owner: OWNER,
+            repo: REPO,
+            issue_number: issue.number,
+            labels: [LABEL_NEEDS_SCREENSHOT],
+          })
+        }
+      })
+    )
+
+    const issuesResolved = issuesWithBugLabel.filter(
+      (issue) =>
+        issue.body &&
+        isAnyScreenshotInMarkdownDocument(issue.body) &&
+        hasLabel(issue.labels, LABEL_NEEDS_SCREENSHOT)
+    )
+
+    await Promise.all(
+      issuesResolved.map(async (issue) => {
+        const shouldConfirm = await prompts({
+          type: 'confirm',
+          name: 'chouldConfirm',
+          message: `Remove ${LABEL_NEEDS_SCREENSHOT} from issue #${issue.number}?`,
+        })
+
+        if (shouldConfirm) {
+          await octokit.rest.issues.removeLabel({
+            owner: OWNER,
+            repo: REPO,
+            issue_number: issue.number,
+            name: LABEL_NEEDS_SCREENSHOT,
+          })
+        }
+      })
+    )
+  })
+
+program.parseAsync()
