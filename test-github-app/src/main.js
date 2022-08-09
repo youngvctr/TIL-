@@ -57,15 +57,18 @@ program
       (issue) => hasLabel(issue.labels, LABEL_BUG)
     )
 
-    const output = issuesWithBugLabel.map((issue) => ({
-      title: issue.title,
-      number: issue.number,
-    }))
+    // const output = issuesWithBugLabel.map((issue) => ({
+    //   title: issue.title,
+    //   number: issue.number,
+    // }))
 
-    // @ts-ignore
-    let res = Boolean(result.data.map[0])
-      ? console.log(chalk.redBright.underline(output))
-      : console.log(chalk.blue(`There has no bugs data`))
+    console.log(
+      chalk.red(
+        chalk.redBright(issuesWithBugLabel.map((issue) => issue.title)),
+        '#',
+        issuesWithBugLabel.map((issue) => issue.number)
+      )
+    )
   })
 
 // 풀 리퀘스트를 모두 검사해서, 만약 너무 diff가 큰(코드 100줄) 풀 리퀘스트가 있으면 `too-big`이라는 레이블을 붙임.
@@ -91,7 +94,7 @@ program
       }))
     )
 
-    if (Boolean(presWithDiff[0]) === false) {
+    if (Boolean(await presWithDiff[0]) === false) {
       console.log(chalk.green('There has no PR data'))
       return
     }
@@ -134,15 +137,17 @@ program
               ),
             })
 
-            return response.shouldContinue === true
-              ? (octokit.rest.issues.addLabels({
-                  owner: OWNER,
-                  repo: REPO,
-                  issue_number: number,
-                  labels: [LABEL_TOO_BIG],
-                }),
-                console.log(chalk.bgGreenBright(`Approved!`)))
-              : console.log(chalk.bgGrey(`Cancelled!`))
+            if (response.shouldContinue) {
+              await octokit.rest.issues.addLabels({
+                owner: OWNER,
+                repo: REPO,
+                issue_number: number,
+                labels: [LABEL_TOO_BIG],
+              })
+              console.log(chalk.bgGreenBright(`Approved!`))
+            } else {
+              console.log(chalk.bgGrey(`Cancelled!`))
+            }
           }
           return undefined
         })
@@ -152,16 +157,19 @@ program
 /**
  *
  * @param {string} md
+ * @returns {boolean}
  */
 function isAnyScreenshotInMarkdownDocument(md) {
-  // 마크다운 문서에서 스크린샷이 있는지를 확인함.
   const tokens = marked.lexer(md)
+  // 마크다운 문서에서 스크린샷이 있는지를 확인함.
+  let didFind = false
   marked.walkTokens(tokens, (token) => {
     if (token.type === 'image') {
-      return true
+      didFind = true
     }
-    return false
   })
+
+  return didFind
 }
 
 // bug 레이블이 달려 있으나, 스크린샷이 없는 이슈에 대해 needs-screenshot 레이블 달기
@@ -178,7 +186,7 @@ program
       labels: 'bug', // 특정 레이블 필터링 가능.
     })
 
-    if (Boolean(result.data[0]) === false) {
+    if (Boolean(await result.data[0]) === false) {
       console.log(chalk.green('There has no data'))
       return
     }
@@ -187,6 +195,7 @@ program
     // 1. bug 레이블이 있고, 스크린샷은 없음 => + needs-screenshot
     const issuesWithoutScreenshot = issuesWithBugLabel.filter(
       (issue) =>
+        // @ts-ignore
         (!issue.body || !isAnyScreenshotInMarkdownDocument(issue.body)) &&
         !hasLabel(issue.labels, LABEL_NEEDS_SCREENSHOT)
     )
