@@ -91,6 +91,11 @@ program
       }))
     )
 
+    if (Boolean(presWithDiff[0]) === false) {
+      console.log(chalk.green('There has no PR data'))
+      return
+    }
+
     const initialValue = 0
     await Promise.all(
       presWithDiff
