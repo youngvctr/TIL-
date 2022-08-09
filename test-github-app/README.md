@@ -221,6 +221,6 @@ const result = await octokit.rest.issues.listForRepo({
 - 한 번에 나은 결과를 만들 수 없으므로 chalk나 예외처리 등을 추가함으로써 좀 더 세세한 스크립트 작성 후 괜찮은 서비스로 만들어봐야 할 것 같다. 
 - Github에 접근하는 방법이 생각보다 쉽지만 보안상 취약해지는 것을 고려한다면 토큰 발급 없이 웹으로 접근하는게 마음은 편할 것 같다.
 
-**참고**
+**Reference**
 - [jeonghojeong_github](https://github.com/JeongHoJeong/fastcampus-2021-examples/tree/main/packages/cli)
 
