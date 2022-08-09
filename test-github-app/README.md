@@ -5,7 +5,14 @@
           협업을 통한 프로젝트가 진행됨에 따라 프로젝트 내에 크고 작은 버그가 발생될 수 있다.   
         이때 발생된 버그 이슈는 프로젝트 리포지토리 ISSUE 탭에 남겨 이를 협업하는 개발자들과 공유하곤 한다.   
         그런데 이와 관련하여 로컬에서 원격 리포지토리에 접근하여 버그 및 기타 논의거리에 접근할 수 있게 된다면 보다 편리하게 개발할 수 있다.   
-        따라서 본 토이 프로젝트를 통해 GITHUB 관리를 위한 CLI를 만들 것이다. 
+        따라서 본 프로젝트를 통해 GITHUB 관리를 위한 CLI를 만들 것이다. 
+  #### 사용된 모듈 
+  - dotenv : private imformation을 blind 처리
+  - commander : 커맨더 설정
+  - octokit : private access to git
+  - prompts : 재확인 질문 / 의도하지 않은 변경을 막음
+  - chalk : 터미널에 출력되는 문자열의 색 변경
+  - marked : 마크다운 문서에 접근
 ## 2. 구현 flow
 
   본 토이프로젝트에서는 commander 설정, github에 접근을 비롯하여 작성할 수 있는 스크립트를 기준으로 나누었을 때 프로필 접근, 버그 목록 접근, Pull-request 접근, 마크다운 문서 접근까지 크게 여섯 개의 코드 조각으로 나눠볼 수 있다. 
@@ -23,10 +30,10 @@
    Bug label이 붙은 문서는 bug와 관련하여 자세한 내용을 담고 있어야 한다. 그래서 issue를 기록한 문서에는 screenshot이 추가되어야 bug가 어떤 문제를 발생시켰는지 눈으로 알 수 있다. 따라서 marked 모듈로 생성한 객체를 통해 Issue에 추가된 markdown 문서에 접근하고, screenshot의 유/무를 파악해야한다. 그리고나서 screenshot이 필요한지를 label로 추가해 상세한 issue보고 문서가 될 수 있게 한다. 한편, screenshot이 추가된 문서는 더이상 label이 필요 없으므로 불필요한 label을 삭제할 수 있도록 한다.
 ## 3. 구현 결과
 
-#### 3.1 예외처리 결과 출력
-![image1](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fcco3wy%2FbtrJlWGCsBd%2FmxgE8qLtcMDkiuCK7AHTPK%2Fimg.png)
+#### 3.1 개요 및 예외처리 결과 출력
+![image1](https://blog.kakaocdn.net/dn/bbFl9w/btrJlhqVjCk/hQ0zlc7la7MFTqllx6QQM1/img.png)
 #### 3.2 각종 Label 추가
-![image2](https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2Fcaaw2N%2FbtrJm8NnMPY%2FIyFsWzkCcK78r1V6FwJ6zK%2Fimg.png)
+![image2](https://blog.kakaocdn.net/dn/b26rDw/btrJjLMzAnc/xgRYN6PamX7OUOdXtNOOeK/img.png)
 ## 4. 이슈
 
   #### 본 Gihub CLI Project를 통해 다음과 같은 사실을 알 수 있었다. 
