@@ -115,7 +115,7 @@ program
         })
         .filter(
           (pr) =>
-            pr && typeof pr.totalChanges === 'number' && pr.totalChanges > 100
+            pr && typeof pr.totalChanges === 'number' && pr.totalChanges > 10
         )
         .map(async ({ labels, number, totalChanges }) => {
           console.log(
