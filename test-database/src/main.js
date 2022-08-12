@@ -11,7 +11,7 @@ async function main () {
     `
     )
     console.log(`
-    Type what you wants in the menu like number, quantity.
+    Type what you want in the menu like number, quantity.
     
     For example,
     If you want chunkychalk's number, 10 then
