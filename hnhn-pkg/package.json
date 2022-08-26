@@ -1,0 +1,6 @@
+{
+    "private": true,
+    "dependencies": {
+        "hnhn-pkg": "^0.1.0"
+    }
+}
