@@ -1,0 +1,38 @@
+main {
+  padding: 50px 0 100px;
+  width: 100%;
+  max-width: 360px;
+  margin: auto;
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.5em;
+  margin-bottom: 25px;
+  font-weight: bold;
+}
+
+h2 {
+  font-size: 1.1em;
+  color: #a09f9e;
+  margin-bottom: 25px;
+}
+
+h3 {
+  font-size: 1em;
+  color: #3f3e3e;
+  margin-top: 25px;
+}
+
+img {
+  width: inherit;
+  margin-bottom: 30px;
+}
+
+p {
+  padding-left: 15px;
+  padding-right: 15px;
+  max-width: 100%;
+  margin-bottom: 40px;
+  font-family: sans-serif;
+}
