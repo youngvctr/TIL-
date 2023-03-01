@@ -1,7 +1,7 @@
 const { readLineInterface } = require('./readline')
 const { readData } = require('./read')
 
-async function main () {
+async function main() {
     console.log(`
 
     [Market Open Only Today🤫]
@@ -25,8 +25,8 @@ async function main () {
         `)
     await readData('inventory')
     await readLineInterface();
-    //await insertData(7, 'berrychunkychalk', 10);
-    //await updateData(30, 'chunkychalk');
+    // await insertData(5, 'berrychunkychalk', 100);
+    // await updateData(30, 'chunkychalk');
 }
 
 main()

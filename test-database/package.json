@@ -1,7 +1,7 @@
 {
   "name": "test-database",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "main.js",
   "keywords": [],
   "author": "hnhn",
   "license": "ISC",

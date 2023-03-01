@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "root",
+    "password": "todayis220624!",
+    "database": "climbing_portal",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}

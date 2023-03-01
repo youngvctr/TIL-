@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 
-const { default: fetch } = require('node-fetch')
+const fetch = require('node-fetch') //수정할 것.
 const {
   getAccessTokenForUserId,
   createUserWithFacebookIdAndGetId,
