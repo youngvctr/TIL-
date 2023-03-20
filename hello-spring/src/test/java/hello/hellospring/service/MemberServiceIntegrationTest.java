@@ -1,30 +1,26 @@
 package hello.hellospring.service;
 
 import hello.hellospring.domain.Member;
-import hello.hellospring.repository.MemoryMemberRepository;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import hello.hellospring.repository.MemberRepository;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-// 단위테스트
-class MemberServiceTest {
-    MemberService memberService;
-    MemoryMemberRepository memberRepository;
+//통합 테스트
+@SpringBootTest
+@Transactional
+class MemberServiceIntegrationTest {
+    @Autowired MemberService memberService;
+    @Autowired MemberRepository memberRepository;
 
-    @BeforeEach
-    public void beforeEach() { //dependency injection (DI)
-        memberRepository = new MemoryMemberRepository(); //같은 memory mem
-        memberService = new MemberService(memberRepository);
-    }
-    @AfterEach
-    public void afterEach() {
-        memberRepository.clearStore();
-    }
     @Test
-    void 회원가입() {
+    //@Commit
+    void 회원가입() throws Exception{
 
         //given : 주어진 데이터
         Member member = new Member();
@@ -34,13 +30,12 @@ class MemberServiceTest {
         Long saveId = memberService.join(member);
 
         //then : 검증 결과
-        Member findMember = memberService.findOne(saveId).get();
-        assertThat(member.getName()).isEqualTo(findMember.getName());
+        Member findMember = memberRepository.findById(saveId).get();
+        assertEquals(member.getName(), findMember.getName());
     }
 
-
     @Test
-    void 중복_회원_예외() {
+    void 중복_회원_예외() throws Exception{
         //given
         Member member1 = new Member();
         member1.setName("spring");
@@ -64,7 +59,7 @@ class MemberServiceTest {
 
     }
 
-    private void fail() {
+    private void findMember() {
     }
 
     @Test
